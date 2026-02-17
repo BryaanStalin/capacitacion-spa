@@ -1,0 +1,36 @@
+import { fileURLToPath, URL } from 'node:url'
+
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [vue()],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
+  },
+  server: {
+    port: 5173,
+    proxy: {
+      // Opcional: proxy para desarrollo si necesitas evitar CORS
+       '/api': {
+         target: 'http://localhost:8050',
+         changeOrigin: true,
+       },
+       '/sanctum': {
+         target: 'http://localhost:8050',
+         changeOrigin: true,
+       },
+      // '/login': {
+      //   target: 'http://localhost:8050',
+      //   changeOrigin: true,
+      // },
+      // '/logout': {
+      //   target: 'http://localhost:8050',
+      //   changeOrigin: true,
+      // }
+    }
+  }
+})
