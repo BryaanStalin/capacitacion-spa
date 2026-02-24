@@ -4,6 +4,7 @@
       <div class="navbar-content">
         <h1 class="navbar-title">Mi Primera Aplicación en Vue3 + Laravel 12</h1>
         <div class="navbar-actions">
+          <span class="user-avatar">{{ getInitials(authStore.currentUser?.user?.user || 'Usuario') }}</span>
           <span class="user-name">{{ authStore.currentUser?.user?.user || 'Usuario' }} - {{ authStore.currentUser?.user?.roles[0]?.titulo || 'Invitado'}}</span>
           <button @click="handleLogout" class="btn-logout" :disabled="authStore.isLoading">
             {{ authStore.isLoading ? 'Cerrando...' : 'Cerrar Sesión' }}
@@ -33,6 +34,23 @@
               <p class="stat-value">Click aquí →</p>
             </div>
           </div>
+          
+          <div class="stat-card clickable" @click="goToRoles">
+            <div class="stat-icon">🔑</div>
+            <div class="stat-info">
+              <p class="stat-label">Ver Roles</p>
+              <p class="stat-value">Click aquí →</p>
+            </div>
+          </div>
+          
+          <div class="stat-card clickable" @click="goToMenus">
+
+            <div class="stat-icon">📋</div>
+            <div class="stat-info">
+              <p class="stat-label">Ver Menús</p>
+              <p class="stat-value">Click aquí →</p>
+            </div>
+          </div>
         </div>
       </div>
     </main>
@@ -57,6 +75,24 @@ const handleLogout = async () => {
 
 const goToUsers = () => {
   router.push({ name: 'usuarios' })
+}
+
+const goToRoles = () => {
+  router.push({ name: 'roles' })
+}
+
+const goToMenus = () => {
+  router.push({ name: 'menu' })
+}
+
+const getInitials = (name) => {
+  if (!name) return '?'
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 }
 </script>
 
@@ -97,6 +133,19 @@ const goToUsers = () => {
   font-size: 14px;
   color: #4a5568;
   font-weight: 500;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .btn-logout {
@@ -187,7 +236,7 @@ const goToUsers = () => {
 }
 
 .stat-value {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
   color: white;
 }

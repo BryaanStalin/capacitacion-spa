@@ -23,6 +23,18 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/roles',
+      name: 'roles',
+      component: () => import('@/views/RolView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/menu',
+      name: 'menu',
+      component: () => import('@/views/MenuView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/views/NotFoundView.vue')
