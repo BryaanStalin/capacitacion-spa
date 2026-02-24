@@ -16,54 +16,44 @@
     <main class="main-content">
       <div class="header-section">
         <button @click="goBack" class="btn-back">← Volver</button>
-        <h2 class="page-title">Listado de Usuarios</h2>
-        <button @click="loadUsers" class="btn-refresh"> Recargar</button>
+        <h2 class="page-title">Listado de Roles del Sistema</h2>
+        <button @click="loadRoles" class="btn-refresh"> Recargar</button>
       </div>
 
       <div class="users-card">
         <!-- Loading state -->
-        <div v-if="usersStore.isLoading" class="loading-container">
+        <div v-if="rolesStore.isLoading" class="loading-container">
           <div class="spinner"></div>
-          <p>Cargando usuarios...</p>
+          <p>Cargando roles...</p>
         </div>
 
         <!-- Error state -->
-        <div v-else-if="usersStore.error" class="error-container">
-          <p class="error-text">{{ usersStore.error }}</p>
-          <button @click="loadUsers" class="btn-retry">Reintentar</button>
+        <div v-else-if="rolesStore.error" class="error-container">
+          <p class="error-text">{{ rolesStore.error }}</p>
+          <button @click="loadRoles" class="btn-retry">Reintentar</button>
         </div>
 
-        <!-- Users table -->
-        <div v-else-if="usersStore.users?.total > 0" class="table-wrapper">
+        <!-- Roles table -->
+        <div v-else-if="rolesStore.roles?.total > 0" class="table-wrapper">
           <div class="table-container">
             <table class="users-table">
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Usuario</th>
-                  <th>Rol</th>
-                  <th>Email</th>
-                  <th>Fecha de Registro</th>
+                  <th>Título</th>
+                  <th>Descripción</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="u in usersStore.users.data" :key="u.id" class="user-row" :class="{ 'is-desactivate': !u.status, 'is-normal': u.status }">
+                <tr v-for="u in rolesStore.roles.data" :key="u.id" class="user-row" :class="{ 'is-desactivate': !u.status, 'is-normal': u.status }">
                   <td>{{ u.id }}</td>
                   <td>
                     <div class="user-cell">
-                      <div class="user-avatar">{{ getInitials(u.nombre) }}</div>
-                      <span>{{ u.nombre }}</span>
+                      <div class="user-avatar">{{ getInitials(u.titulo) }}</div>
+                      <span>{{ u.titulo }}</span>
                     </div>
                   </td>
-                  <td>{{ u.user }}</td>
-                  <td>
-                    <span v-for="rol in u.roles" :key="rol.id" class="badge">
-                      {{ rol.titulo }}
-                    </span>
-                  </td>
-                  <td>{{ u.email }}</td>
-                  <td>{{ u.created_at ? formatDate(u.created_at) : 'Sin fecha' }}</td>
+                  <td>{{ u.descripcion }}</td>
                 </tr>
               </tbody>
             </table>
@@ -74,9 +64,9 @@
             <div class="pagination-info">
               <p>
                 Mostrando 
-                <strong>{{ usersStore.users.from }}</strong> a 
-                <strong>{{ usersStore.users.to }}</strong> de 
-                <strong>{{ usersStore.users.total }}</strong> usuarios
+                <strong>{{ rolesStore.roles.from }}</strong> a 
+                <strong>{{ rolesStore.roles.to }}</strong> de 
+                <strong>{{ rolesStore.roles.total }}</strong> roles
               </p>
             </div>
 
@@ -85,7 +75,7 @@
               <button 
                 @click="goToPage(1)" 
                 class="pagination-btn"
-                :disabled="usersStore.users.current_page === 1 || usersStore.isLoading"
+                :disabled="rolesStore.roles.current_page === 1 || rolesStore.isLoading"
                 title="Primera página"
               >
                 <span class="pagination-icon">⟪</span>
@@ -93,9 +83,9 @@
 
               <!-- Previous Page Button -->
               <button 
-                @click="goToPage(usersStore.users.current_page - 1)" 
+                @click="goToPage(rolesStore.roles.current_page - 1)" 
                 class="pagination-btn"
-                :disabled="!usersStore.users.prev_page_url || usersStore.isLoading"
+                :disabled="!rolesStore.roles.prev_page_url || rolesStore.isLoading"
                 title="Página anterior"
               >
                 <span class="pagination-icon">‹</span>
@@ -108,8 +98,8 @@
                   :key="page"
                   @click="goToPage(page)"
                   class="page-number-btn"
-                  :class="{ active: page === usersStore.users.current_page }"
-                  :disabled="usersStore.isLoading"
+                  :class="{ active: page === rolesStore.roles.current_page }"
+                  :disabled="rolesStore.isLoading"
                 >
                   {{ page }}
                 </button>
@@ -117,9 +107,9 @@
 
               <!-- Next Page Button -->
               <button 
-                @click="goToPage(usersStore.users.current_page + 1)" 
+                @click="goToPage(rolesStore.roles.current_page + 1)" 
                 class="pagination-btn"
-                :disabled="!usersStore.users.next_page_url || usersStore.isLoading"
+                :disabled="!rolesStore.roles.next_page_url || rolesStore.isLoading"
                 title="Página siguiente"
               >
                 <span class="pagination-icon">›</span>
@@ -127,9 +117,9 @@
 
               <!-- Last Page Button -->
               <button 
-                @click="goToPage(usersStore.users.last_page)" 
+                @click="goToPage(rolesStore.roles.last_page)" 
                 class="pagination-btn"
-                :disabled="usersStore.users.current_page === usersStore.users.last_page || usersStore.isLoading"
+                :disabled="rolesStore.roles.current_page === rolesStore.roles.last_page || rolesStore.isLoading"
                 title="Última página"
               >
                 <span class="pagination-icon">⟫</span>
@@ -143,7 +133,7 @@
                 id="perPage" 
                 v-model="perPage" 
                 @change="changePerPage"
-                :disabled="usersStore.isLoading"
+                :disabled="rolesStore.isLoading"
                 class="per-page-select"
               >
                 <option :value="10">10</option>
@@ -158,7 +148,7 @@
 
         <!-- Empty state -->
         <div v-else class="empty-container">
-          <p>No hay usuarios registrados</p>
+          <p>No hay roles registrados</p>
         </div>
       </div>
     </main>
@@ -169,38 +159,38 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useUsersStore } from '@/stores/users'
+import { useRolesStore } from '@/stores/roles'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const usersStore = useUsersStore()
-const perPage = ref(20)
+const rolesStore = useRolesStore()
+const perPage = ref(10)
 
 onMounted(async () => {
-  await loadUsers()
+  await loadRoles()
 })
 
-const loadUsers = async (page = 1) => {
+const loadRoles = async (page = 1) => {
   try {
-    await usersStore.fetchUsers(page, perPage.value)
+    await rolesStore.fetchRoles(page, perPage.value)
   } catch (error) {
-    console.error('Error al cargar usuarios:', error)
+    console.error('Error al cargar roles:', error)
   }
 }
 
 const goToPage = async (page) => {
-  if (page < 1 || page > usersStore.users.last_page) return
-  await loadUsers(page)
+  if (page < 1 || page > rolesStore.roles.last_page) return
+  await loadRoles(page)
 }
 
 const changePerPage = async () => {
-  await loadUsers(1) // Volver a la primera página al cambiar items por página
+  await loadRoles(1) // Volver a la primera página al cambiar items por página
 }
 
 const handleLogout = async () => {
   try {
     await authStore.logout()
-    usersStore.resetStore()
+    rolesStore.resetStore()
     router.push({ name: 'login' })
   } catch (error) {
     console.error('Error al cerrar sesión:', error)
@@ -233,10 +223,10 @@ const formatDate = (dateString) => {
 
 // Computed property para mostrar números de página visibles
 const visiblePages = computed(() => {
-  if (!usersStore.users?.last_page) return []
+  if (!rolesStore.roles?.last_page) return []
   
-  const current = usersStore.users.current_page
-  const last = usersStore.users.last_page
+  const current = rolesStore.roles.current_page
+  const last = rolesStore.roles.last_page
   const delta = 2 // Cuántas páginas mostrar a cada lado de la actual
   
   const pages = []
@@ -404,22 +394,6 @@ const visiblePages = computed(() => {
   font-size: 16px;
 }
 
-.btn-retry {
-  padding: 10px 24px;
-  background-color: #667eea;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.btn-retry:hover {
-  background-color: #5568d3;
-}
-
 .btn-refresh {
   padding: 10px 24px;
   background-color: #10a610;
@@ -435,6 +409,22 @@ const visiblePages = computed(() => {
 
 .btn-refresh:hover {
   background-color: #197a19;
+}
+
+.btn-retry {
+  padding: 10px 24px;
+  background-color: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-retry:hover {
+  background-color: #5568d3;
 }
 
 .table-wrapper {
