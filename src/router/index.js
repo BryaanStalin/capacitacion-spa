@@ -8,36 +8,37 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue'),
-      meta: { requiresGuest: true }
+      meta: { requiresGuest: true, layout: 'auth' } // sin navbar
     },
     {
       path: '/',
       name: 'home',
       component: () => import('@/views/HomeView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, layout: 'default' } // con navbar
     },
     {
       path: '/usuarios',
       name: 'usuarios',
       component: () => import('@/views/UsersView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, layout: 'default' }
     },
     {
       path: '/roles',
       name: 'roles',
       component: () => import('@/views/RolView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, layout: 'default' }
     },
     {
       path: '/menu',
       name: 'menu',
       component: () => import('@/views/MenuView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, layout: 'default' }
     },
     {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
-      component: () => import('@/views/NotFoundView.vue')
+      component: () => import('@/views/NotFoundView.vue'),
+      meta: { layout: 'auth' } // normalmente sin navbar
     }
   ]
 })
