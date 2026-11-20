@@ -13,14 +13,29 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => user.value !== null)
   const currentUser = computed(() => user.value)
 
+  let initPromise = null
+
   // Actions
   async function initCsrf() {
+    await axios.get('/sanctum/csrf-cookie')
+  }
+
+  async function runInit() {
     try {
-      // Obtener cookie CSRF de Sanctum
-      await axios.get('/sanctum/csrf-cookie')
+        await fetchUser()
     } catch (err) {
-      console.error('Error al obtener CSRF cookie:', err)
+        user.value = null
+    } finally {
+        initialized.value = true
     }
+  }
+
+  function ensureAuthReady() {
+    if (!initPromise) {
+        initPromise = runInit()
+    }
+
+    return initPromise
   }
 
   async function login(credentials) {
@@ -46,17 +61,22 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout() {
     isLoading.value = true
     error.value = null
-    
+
     try {
-      await axios.post('/logout')
-      user.value = null
-      initialized.value = false
-      return true
+        await axios.post('/logout')
+        user.value = null
+        return true
     } catch (err) {
-      error.value = err.response?.data?.message || 'Error al cerrar sesión'
-      throw err
+        const status = err.response?.status
+
+        if (status === 401 || status === 419) {
+            user.value = null
+        }
+
+        error.value = err.response?.data?.message || 'Error al cerrar sesión'
+        throw err
     } finally {
-      isLoading.value = false
+        isLoading.value = false
     }
   }
 
@@ -83,13 +103,21 @@ async function ensureAuthReady() {
   }
 
   async function checkAuth() {
-    try {
-      await fetchUser()
-      return true
-    } catch (err) {
-      user.value = null
-      return false
+    if (initialized.value) {
+        return
     }
+
+    try {
+        await fetchUser()
+    } catch (err) {
+        user.value = null
+    } finally {
+        initialized.value = true
+    }
+  }
+
+  function clearSession() {
+    user.value = null
   }
 
   function clearError() {
@@ -111,6 +139,7 @@ async function ensureAuthReady() {
     logout,
     fetchUser,
     checkAuth,
+    clearSession,
     clearError
   }
 })

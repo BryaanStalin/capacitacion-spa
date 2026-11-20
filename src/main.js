@@ -4,20 +4,22 @@ import App from './App.vue'
 import router from './router'
 import './style.css'
 import { useAuthStore } from '@/stores/auth'
-import axios from '@/plugins/axios'
+import { setupAxiosInterceptors } from '@/plugins/axios'
 
+async function bootstrap() {
+    const app = createApp(App)
+    const pinia = createPinia()
 
-const app = createApp(App)
-const pinia = createPinia()
-app.use(pinia)
+    app.use(pinia)
 
-// Hidratar ANTES de instalar el router
-const auth = useAuthStore()
-try {
+    const auth = useAuthStore()
+
+    setupAxiosInterceptors(router, auth)
+
     await auth.ensureAuthReady()
-} catch (e) {
-    // Ignorar; no autenticado es un estado válido
+
+    app.use(router)
+    app.mount('#app')
 }
 
-app.use(router)
-app.mount('#app')
+bootstrap()

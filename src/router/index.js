@@ -44,22 +44,21 @@ const router = createRouter({
 })
 
 // Guard de navegación global
-router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore()
+router.beforeEach(async (to) => {
+    const authStore = useAuthStore()
 
-  await authStore.ensureAuthReady()
-    
-  // Si está autenticado y trata de ir al login, redirigir a home
-  if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    return next({ name: 'home' })
-  }
-  
-  // Si requiere autenticación y no está autenticado
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return next({ name: 'login' })
-  }
-  
-  next()
+    await authStore.ensureAuthReady()
+
+    if (to.meta.requiresGuest && authStore.isAuthenticated) {
+        return { name: 'home' }
+    }
+
+    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+        return {
+            name: 'login',
+            query: { redirect: to.fullPath }
+        }
+    }
 })
 
 export default router
